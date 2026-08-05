@@ -56,6 +56,10 @@
     "url": "https://github.com/licensr/licensr-js.git",
     "directory": "sdks/js"
   },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "homepage": "https://docs.licensr.app/sdks/js",
   "keywords": [
     "licensr",
