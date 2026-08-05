@@ -64,10 +64,5 @@
     "software-licensing",
     "activation",
     "sdk"
-  ],
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "esbuild"
-    ]
-  }
+  ]
 }
