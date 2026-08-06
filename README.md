@@ -2,7 +2,7 @@
 
 Official JavaScript/TypeScript SDK for the [Licensr](https://licensr.app) license API: validation, seat/domain activation, offline EdDSA token verification, and hosted checkout. Ships as dual ESM/CJS with bundled types, zero runtime dependencies beyond [`jose`](https://github.com/panva/jose) (for offline token verification).
 
-See [`docs/plugin-integration.md`](../../frontend/public/plugin-integration.md) for the underlying API's concepts (activation modes, entitlement/fallback, rate limits, the embedded-key doctrine) — this README covers the JS-specific surface.
+See the [plugin integration guide](https://docs.licensr.app/plugin-integration) for the underlying API's concepts (activation modes, entitlement/fallback, rate limits, the embedded-key doctrine) — this README covers the JS-specific surface.
 
 ## Install
 
