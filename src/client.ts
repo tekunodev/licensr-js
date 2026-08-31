@@ -3,6 +3,7 @@ import {requestJson, type HttpClientConfig, type RetryOptions} from './http.js';
 import type {
   ActivateRequest,
   ActivateResponse,
+  ActivationsRequest,
   ActivationsResponse,
   CheckoutRequest,
   CheckoutResponse,
@@ -142,7 +143,7 @@ export class LicensrClient {
   }
 
   /** List every current activation for a license (seats/domains in use). */
-  async activations(req: {licenseKey: string}): Promise<ActivationsResponse> {
+  async activations(req: ActivationsRequest): Promise<ActivationsResponse> {
     return this.run('activations', async () => {
       const wire = await requestJson<ActivationsResponseWire>(this.http, {
         method: 'GET',

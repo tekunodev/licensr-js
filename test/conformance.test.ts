@@ -116,9 +116,11 @@ async function send(base: string, request: ConformanceCase['request'], values: F
 describe.skipIf(!baseUrl || !fixturesPath)('conformance suite (contract/conformance.yaml)', () => {
   const cases = loadCases();
   const fixtures = fixturesPath ? loadFixtures(fixturesPath) : {};
+  const runSlow = Boolean(process.env.CONFORMANCE_RUN_SLOW);
 
   for (const testCase of cases) {
-    it(testCase.id, async () => {
+    const skipSlow = testCase.id === 'rate_limit_exceeded' && !runSlow;
+    it.skipIf(skipSlow)(testCase.id, async () => {
       const values = fixtures[testCase.id];
       if (!values) {
         throw new Error(`no seeded fixtures for case ${testCase.id} — re-run seed_conformance_fixtures.py`);
