@@ -57,8 +57,7 @@
     "directory": "sdks/js"
   },
   "publishConfig": {
-    "access": "public",
-    "provenance": true
+    "access": "public"
   },
   "homepage": "https://docs.licensr.app/sdks/js",
   "keywords": [
