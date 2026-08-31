@@ -141,3 +141,7 @@ pnpm exec vitest run test/conformance.test.ts
 ```
 
 CI wires up the same four steps as one job — see `.github/workflows/test-sdk-js.yaml`.
+
+## Releasing
+
+Bump `"version"` in `package.json`, commit to `main`, then tag `js/vX.Y.Z` and push the tag (triggers npm publish + mirror). Step-by-step: [`docs/SDK_PROGRAM.md` §2](../../docs/SDK_PROGRAM.md#2-releasing-an-sdk-update) or [`sdks/RELEASING.md`](../RELEASING.md).
