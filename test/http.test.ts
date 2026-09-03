@@ -162,6 +162,28 @@ describe('requestJson', () => {
     expect(fetchImpl).toHaveBeenCalledTimes(2);
   });
 
+  it('hints at Allowed origins when a browser CORS-like fetch fails', async () => {
+    const g = globalThis as {window?: unknown};
+    const prev = g.window;
+    g.window = {};
+    try {
+      const fetchImpl = vi.fn().mockRejectedValue(new TypeError('Failed to fetch'));
+      await expect(
+        requestJson(baseConfig({fetchImpl, retry: {maxRetries: 0, baseDelayMs: 1, maxDelayMs: 1}}), {
+          method: 'POST',
+          path: 'v1/license/validate',
+          body: {},
+        })
+      ).rejects.toMatchObject({
+        name: 'LicensrNetworkError',
+        message: expect.stringContaining('Allowed origins'),
+      });
+    } finally {
+      if (prev === undefined) delete g.window;
+      else g.window = prev;
+    }
+  });
+
   it('recovers from a transient network failure on retry', async () => {
     const fetchImpl = vi
       .fn()

@@ -71,6 +71,30 @@ function jitterDelayMs(attempt: number, baseDelayMs: number, maxDelayMs: number)
   return Math.random() * cap;
 }
 
+function isLikelyBrowserCorsFailure(cause: unknown): boolean {
+  // Browsers hide CORS failures as TypeError from fetch(); Node has no window.
+  if (typeof (globalThis as {window?: unknown}).window === 'undefined') return false;
+  if (!(cause instanceof TypeError)) return false;
+  const msg = cause.message.toLowerCase();
+  return (
+    msg.includes('failed to fetch') ||
+    msg.includes('fetch failed') ||
+    msg.includes('load failed') ||
+    msg.includes('networkerror') ||
+    msg.includes('blocked by cors')
+  );
+}
+
+function networkFailureMessage(path: string, attempts: number, cause: unknown): string {
+  const base = `Request to ${path} failed after ${attempts} attempt(s)`;
+  if (!isLikelyBrowserCorsFailure(cause)) return base;
+  return (
+    `${base}. The browser blocked this as a CORS failure — add this page's origin ` +
+    `(scheme + host + port, e.g. http://localhost:3010) to the product's Allowed origins, ` +
+    `or leave Allowed origins empty to allow any origin.`
+  );
+}
+
 function parseRetryAfterSeconds(header: string | null): number | null {
   if (!header) return null;
   const seconds = Number(header);
@@ -161,7 +185,7 @@ export async function requestJson<T>(config: HttpClientConfig, spec: RequestSpec
         await sleep(delayMs);
         continue;
       }
-      throw new LicensrNetworkError(`Request to ${spec.path} failed after ${attempt + 1} attempt(s)`, cause);
+      throw new LicensrNetworkError(networkFailureMessage(spec.path, attempt + 1, cause), cause);
     }
     if (timeoutHandle !== undefined) clearTimeout(timeoutHandle);
 

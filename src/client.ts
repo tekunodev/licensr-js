@@ -29,9 +29,16 @@ import {
 } from './wire.js';
 
 export interface LicensrClientConfig {
-  /** Plugin API key (`pk_live_...` / `pk_test_...`) — see docs/plugin-integration.md. */
+  /**
+   * Plugin API key (`pk_live_...` / `pk_test_...`).
+   * Admin → Catalog → your product → **API keys**. Issue a **Client** key to
+   * embed in a browser or shipped app (it cannot open checkout).
+   */
   apiKey: string;
-  /** The plugin this key belongs to (matches the slug in the admin dashboard). */
+  /**
+   * Product slug from Admin → Catalog (the same value on the product row).
+   * Sent as `plugin_slug` on every license call.
+   */
   pluginSlug: string;
   /** Defaults to `https://api.licensr.app`. Override for self-hosted/staging. */
   baseUrl?: string;

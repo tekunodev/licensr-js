@@ -16,8 +16,8 @@ npm install @licensr/sdk
 import {LicensrClient} from '@licensr/sdk';
 
 const client = new LicensrClient({
-  apiKey: 'pk_live_...', // safe to embed in a distributed binary/webview — see §6.1 of plugin-integration.md
-  pluginSlug: 'my-plugin',
+  apiKey: 'pk_live_...', // Client key from Admin → Catalog → product → API keys
+  pluginSlug: 'my-plugin', // product slug on that same row
 });
 
 const result = await client.validate({licenseKey: userEnteredKey});
@@ -27,6 +27,8 @@ if (result.valid) {
   unlockDegradedMode(); // perpetual-fallback: expired, but the plan grants a limited tier
 }
 ```
+
+`pluginSlug` and `apiKey` both come from **Admin → Catalog → your product**. Use a **Client** key in the browser. For browser calls, add this page's origin (`http://localhost:3010`, `https://app.example.com`) under **Allowed origins**, or leave that list empty to allow any origin.
 
 ## API
 
