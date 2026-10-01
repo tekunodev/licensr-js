@@ -91,11 +91,13 @@ To boot fully offline (no network at all, e.g. on first launch before any succes
 import {InMemoryOfflineTokenStore, verifyOfflineToken} from '@licensr/sdk';
 
 const store = new InMemoryOfflineTokenStore(); // swap for your own persistent implementation
+// details.jwksUrl from your last online token() call. It does not change, so save it next to the token.
+const jwksUrl = savedJwksUrl;
 
 const cached = store.get(licenseKey);
 if (cached) {
   try {
-    await verifyOfflineToken(cached.token, details.jwksUrl); // still valid — usable while offline
+    await verifyOfflineToken(cached.token, jwksUrl); // still valid — usable while offline
   } catch {
     /* expired or tampered — fall through to an online check */
   }
