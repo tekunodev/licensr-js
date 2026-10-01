@@ -28,6 +28,8 @@ if (result.valid) {
 }
 ```
 
+The result keeps what you act on at the top level: `valid`, `status` (why, for your message), `entitlement` and `featureFlags`. Plan and limit details are grouped under `result.license` (`planId`, `activationMode`, `maxSeats`, `maxDomains`, `seatsInUse`, `expiresAt`). They are for display only; never use them to decide whether to unlock.
+
 `pluginSlug` and `apiKey` both come from **Admin → Catalog → your product**. Use a **Client** key in the browser. For browser calls, add this page's origin (`http://localhost:3010`, `https://app.example.com`) under **Allowed origins**, or leave that list empty to allow any origin.
 
 ## API
@@ -76,12 +78,12 @@ Available events: `validated`, `activated`, `deactivated`, `tokenIssued`, `retry
 ```ts
 import {verifyOfflineToken} from '@licensr/sdk';
 
-const {token, jwksUrl} = await client.token({licenseKey});
-const claims = await verifyOfflineToken(token, jwksUrl);
+const {token, details} = await client.token({licenseKey});
+const claims = await verifyOfflineToken(token, details.jwksUrl);
 // claims.valid, claims.entitlement, claims.exp, ...
 ```
 
-Offline tokens carry no revocation signal — they prove the token was genuinely issued and hasn't expired, not that the license is still active _right now_. Re-validate online before `expiresAt`.
+Offline tokens carry no revocation signal — they prove the token was genuinely issued and hasn't expired, not that the license is still active _right now_. Re-validate online before `details.expiresAt`.
 
 To boot fully offline (no network at all, e.g. on first launch before any successful `/token` call), persist the last-known-good token yourself using the `OfflineTokenStore` interface (a `InMemoryOfflineTokenStore` is included, but doesn't survive a restart — back it with `localStorage`, a config file, or your platform's keychain):
 
@@ -93,7 +95,7 @@ const store = new InMemoryOfflineTokenStore(); // swap for your own persistent i
 const cached = store.get(licenseKey);
 if (cached) {
   try {
-    await verifyOfflineToken(cached.token, jwksUrl); // still valid — usable while offline
+    await verifyOfflineToken(cached.token, details.jwksUrl); // still valid — usable while offline
   } catch {
     /* expired or tampered — fall through to an online check */
   }

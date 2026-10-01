@@ -14,30 +14,30 @@ describe('wire mappers', () => {
       fromValidateWire({
         valid: true,
         status: 'active',
-        plan_id: 'plan-1',
-        plan_name: 'Pro',
-        activation_mode: 'seat',
-        max_seats: 5,
-        max_domains: null,
-        seats_in_use: 1,
-        expires_at: '2027-01-01T00:00:00Z',
         entitlement: 'full',
-        fallback: false,
         feature_flags: {beta: true},
+        license: {
+          plan_id: 'plan-1',
+          activation_mode: 'seat',
+          max_seats: 5,
+          max_domains: null,
+          seats_in_use: 1,
+          expires_at: '2027-01-01T00:00:00Z',
+        },
       })
     ).toEqual({
       valid: true,
       status: 'active',
-      planId: 'plan-1',
-      planName: 'Pro',
-      activationMode: 'seat',
-      maxSeats: 5,
-      maxDomains: null,
-      seatsInUse: 1,
-      expiresAt: '2027-01-01T00:00:00Z',
       entitlement: 'full',
-      fallback: false,
       featureFlags: {beta: true},
+      license: {
+        planId: 'plan-1',
+        activationMode: 'seat',
+        maxSeats: 5,
+        maxDomains: null,
+        seatsInUse: 1,
+        expiresAt: '2027-01-01T00:00:00Z',
+      },
     });
   });
 
@@ -45,19 +45,23 @@ describe('wire mappers', () => {
     expect(
       fromTokenWire({
         token: 'jwt',
-        algorithm: 'EdDSA',
-        kid: 'kid-1',
-        issued_at: '2027-01-01T00:00:00Z',
-        expires_at: '2027-02-01T00:00:00Z',
-        jwks_url: 'https://api.licensr.app/v1/license/jwks/acme/demo.json',
+        details: {
+          algorithm: 'EdDSA',
+          kid: 'kid-1',
+          issued_at: '2027-01-01T00:00:00Z',
+          expires_at: '2027-02-01T00:00:00Z',
+          jwks_url: 'https://api.licensr.app/v1/license/jwks/acme/demo.json',
+        },
       })
     ).toEqual({
       token: 'jwt',
-      algorithm: 'EdDSA',
-      kid: 'kid-1',
-      issuedAt: '2027-01-01T00:00:00Z',
-      expiresAt: '2027-02-01T00:00:00Z',
-      jwksUrl: 'https://api.licensr.app/v1/license/jwks/acme/demo.json',
+      details: {
+        algorithm: 'EdDSA',
+        kid: 'kid-1',
+        issuedAt: '2027-01-01T00:00:00Z',
+        expiresAt: '2027-02-01T00:00:00Z',
+        jwksUrl: 'https://api.licensr.app/v1/license/jwks/acme/demo.json',
+      },
     });
   });
 
@@ -65,11 +69,14 @@ describe('wire mappers', () => {
     expect(
       fromActivateWire({
         activation_id: 'act-1',
-        activation_type: 'seat',
-        identifier: 'hwid-1',
         feature_flags: null,
+        activation: {type: 'seat', identifier: 'hwid-1'},
       })
-    ).toEqual({activationId: 'act-1', activationType: 'seat', identifier: 'hwid-1', featureFlags: null});
+    ).toEqual({
+      activationId: 'act-1',
+      featureFlags: null,
+      activation: {type: 'seat', identifier: 'hwid-1'},
+    });
   });
 
   it('fromDeactivateWire maps deactivated', () => {

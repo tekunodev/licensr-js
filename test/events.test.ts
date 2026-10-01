@@ -12,16 +12,16 @@ describe('LicensrEventEmitter', () => {
     const payload = {
       valid: true,
       status: 'active',
-      planId: null,
-      planName: null,
-      activationMode: null,
-      maxSeats: null,
-      maxDomains: null,
-      seatsInUse: null,
-      expiresAt: null,
       entitlement: 'full',
-      fallback: false,
       featureFlags: null,
+      license: {
+        planId: null,
+        activationMode: null,
+        maxSeats: null,
+        maxDomains: null,
+        seatsInUse: null,
+        expiresAt: null,
+      },
     } as const;
     emitter.emit('validated', payload);
 

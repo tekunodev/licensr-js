@@ -15,21 +15,30 @@ export interface ValidateRequest {
   licenseKey: string;
 }
 
-export interface ValidateResponse {
-  valid: boolean;
-  status: LicenseStatus;
+/** Information about the license. Nothing here decides access; safe to ignore. */
+export interface LicenseDetails {
   planId: string | null;
-  planName: string | null;
   activationMode: ActivationType | null;
+  /** Devices or users allowed. `null` means unlimited. */
   maxSeats: number | null;
+  /** Websites allowed. `null` means unlimited. */
   maxDomains: number | null;
   seatsInUse: number | null;
+  /** When the license expires. `null` means it never expires. */
   expiresAt: string | null;
-  /** `full` when valid, `none` when cut off, `limited` alongside `fallback: true`. */
+}
+
+export interface ValidateResponse {
+  /** The answer you gate on: `true` unlocks your product, `false` keeps it locked. */
+  valid: boolean;
+  /** Why: pick the message to show the customer. Do not gate access on it. */
+  status: LicenseStatus;
+  /** Optional. `limited` means expired but a fallback plan keeps reduced access. */
   entitlement: Entitlement;
-  /** `true` only when an *expired* license is on a perpetual-fallback plan. */
-  fallback: boolean;
+  /** Optional. Custom per-plan settings you defined. */
   featureFlags: Record<string, unknown> | null;
+  /** Plan, limits and expiry. Informational only. */
+  license: LicenseDetails;
 }
 
 export interface ActivateRequest {
@@ -41,11 +50,17 @@ export interface ActivateRequest {
   label?: string | null;
 }
 
-export interface ActivateResponse {
-  activationId: string;
-  activationType: ActivationType;
+/** What was activated (an echo of your request). Informational only. */
+export interface ActivationInfo {
+  type: ActivationType;
   identifier: string;
+}
+
+export interface ActivateResponse {
+  /** Save this: you need it to deactivate later. */
+  activationId: string;
   featureFlags: Record<string, unknown> | null;
+  activation: ActivationInfo;
 }
 
 export interface DeactivateRequest {
@@ -75,9 +90,8 @@ export interface ActivationsResponse {
   activations: ActivationListItem[];
 }
 
-export interface TokenResponse {
-  /** EdDSA-signed JWT — verify with {@link verifyOfflineToken} or `jose` directly. */
-  token: string;
+/** How to verify the offline token and when to refresh it. */
+export interface TokenDetails {
   algorithm: string;
   kid: string;
   issuedAt: string;
@@ -85,7 +99,13 @@ export interface TokenResponse {
   jwksUrl: string;
 }
 
-/** Claims embedded in the offline token (`token`); mirrors {@link ValidateResponse}. */
+export interface TokenResponse {
+  /** EdDSA-signed JWT — verify with {@link verifyOfflineToken} (pass `details.jwksUrl`) or `jose` directly. */
+  token: string;
+  details: TokenDetails;
+}
+
+/** Claims embedded in the offline token (`token`). Flat, as in any JWT; carries the same facts as {@link ValidateResponse}. */
 export interface OfflineTokenClaims {
   sub: string;
   iss: string;

@@ -34,16 +34,16 @@ describe('LicensrClient', () => {
       jsonResponse(200, {
         valid: true,
         status: 'active',
-        plan_id: 'plan-1',
-        plan_name: 'Pro',
-        activation_mode: 'seat',
-        max_seats: 5,
-        max_domains: null,
-        seats_in_use: 1,
-        expires_at: null,
         entitlement: 'full',
-        fallback: false,
         feature_flags: null,
+        license: {
+          plan_id: 'plan-1',
+          activation_mode: 'seat',
+          max_seats: 5,
+          max_domains: null,
+          seats_in_use: 1,
+          expires_at: null,
+        },
       })
     );
     const client = makeClient(fetchImpl);
@@ -51,7 +51,8 @@ describe('LicensrClient', () => {
     const result = await client.validate({licenseKey: 'lic_abc'});
 
     expect(result.valid).toBe(true);
-    expect(result.planName).toBe('Pro');
+    expect(result.license.maxSeats).toBe(5);
+    expect(result.license.planId).toBe('plan-1');
     const {url, method, body} = lastRequest(fetchImpl);
     expect(method).toBe('POST');
     expect(url).toBe('https://api.example.test/v1/license/validate');
@@ -62,11 +63,13 @@ describe('LicensrClient', () => {
     fetchImpl.mockResolvedValue(
       jsonResponse(200, {
         token: 'jwt-value',
-        algorithm: 'EdDSA',
-        kid: 'kid-1',
-        issued_at: '2027-01-01T00:00:00Z',
-        expires_at: '2027-02-01T00:00:00Z',
-        jwks_url: 'https://api.example.test/v1/license/jwks/acme/demo-plugin.json',
+        details: {
+          algorithm: 'EdDSA',
+          kid: 'kid-1',
+          issued_at: '2027-01-01T00:00:00Z',
+          expires_at: '2027-02-01T00:00:00Z',
+          jwks_url: 'https://api.example.test/v1/license/jwks/acme/demo-plugin.json',
+        },
       })
     );
     const client = makeClient(fetchImpl);
@@ -74,13 +77,17 @@ describe('LicensrClient', () => {
     const result = await client.token({licenseKey: 'lic_abc'});
 
     expect(result.token).toBe('jwt-value');
-    expect(result.jwksUrl).toBe('https://api.example.test/v1/license/jwks/acme/demo-plugin.json');
+    expect(result.details.jwksUrl).toBe('https://api.example.test/v1/license/jwks/acme/demo-plugin.json');
     expect(lastRequest(fetchImpl).url).toBe('https://api.example.test/v1/license/token');
   });
 
   it('activate() sends activation_type/identifier/label and maps the response', async () => {
     fetchImpl.mockResolvedValue(
-      jsonResponse(200, {activation_id: 'act-1', activation_type: 'seat', identifier: 'hwid-1', feature_flags: null})
+      jsonResponse(200, {
+        activation_id: 'act-1',
+        feature_flags: null,
+        activation: {type: 'seat', identifier: 'hwid-1'},
+      })
     );
     const client = makeClient(fetchImpl);
 
@@ -92,6 +99,7 @@ describe('LicensrClient', () => {
     });
 
     expect(result.activationId).toBe('act-1');
+    expect(result.activation).toEqual({type: 'seat', identifier: 'hwid-1'});
     const {body} = lastRequest(fetchImpl);
     expect(body).toEqual({
       license_key: 'lic_abc',
@@ -106,9 +114,8 @@ describe('LicensrClient', () => {
     fetchImpl.mockResolvedValue(
       jsonResponse(200, {
         activation_id: 'act-1',
-        activation_type: 'domain',
-        identifier: 'example.com',
         feature_flags: null,
+        activation: {type: 'domain', identifier: 'example.com'},
       })
     );
     const client = makeClient(fetchImpl);
@@ -157,16 +164,16 @@ describe('LicensrClient', () => {
       jsonResponse(200, {
         valid: true,
         status: 'active',
-        plan_id: null,
-        plan_name: null,
-        activation_mode: null,
-        max_seats: null,
-        max_domains: null,
-        seats_in_use: null,
-        expires_at: null,
         entitlement: 'full',
-        fallback: false,
         feature_flags: null,
+        license: {
+          plan_id: null,
+          activation_mode: null,
+          max_seats: null,
+          max_domains: null,
+          seats_in_use: null,
+          expires_at: null,
+        },
       })
     );
     const client = makeClient(fetchImpl);
