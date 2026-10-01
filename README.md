@@ -2,7 +2,7 @@
 
 Official JavaScript/TypeScript SDK for the [Licensr](https://licensr.app) license API: validation, seat/domain activation, offline EdDSA token verification, and hosted checkout. Ships as dual ESM/CJS with bundled types, zero runtime dependencies beyond [`jose`](https://github.com/panva/jose) (for offline token verification).
 
-See the [plugin integration guide](https://docs.licensr.app/plugin-integration) for the underlying API's concepts (activation modes, entitlement/fallback, rate limits, the embedded-key doctrine) — this README covers the JS-specific surface.
+See the [License calls guide](https://docs.licensr.app/plugin-integration) for the underlying API's concepts (activation modes, entitlement/fallback, rate limits, the embedded-key doctrine) — this README covers the JS-specific surface.
 
 ## Install
 
@@ -30,7 +30,7 @@ if (result.valid) {
 
 The result keeps what you act on at the top level: `valid`, `status` (why, for your message), `entitlement` and `featureFlags`. Plan and limit details are grouped under `result.license` (`planId`, `activationMode`, `maxSeats`, `maxDomains`, `seatsInUse`, `expiresAt`). They are for display only; never use them to decide whether to unlock.
 
-`pluginSlug` and `apiKey` both come from **Admin → Catalog → your product**. Use a **Client** key in the browser. For browser calls, add this page's origin (`http://localhost:3010`, `https://app.example.com`) under **Allowed origins**, or leave that list empty to allow any origin.
+`pluginSlug` and `apiKey` both come from **Admin → Catalog → your product**. Use a **Client** key in the browser. For browser calls, set the product's client type to **Browser** and add this page's address (`http://localhost:3010`, `https://app.example.com`) under **Advanced options → Allowed websites** on the product form, or leave that list empty to allow any website.
 
 ## API
 
