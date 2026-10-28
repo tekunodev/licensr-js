@@ -45,6 +45,8 @@ Every method returns a camelCase-mapped response and throws on failure — see [
 | `client.activations({licenseKey})`                                  | `GET /v1/license/activations` | Lists every current activation.                                                                                          |
 | `client.checkout({planId, customerEmail, successUrl?, cancelUrl?})` | `POST /v1/billing/checkout`   | Returns `checkoutUrl` — redirect the user there. Requires a key with the `checkout` scope.                               |
 
+With a test key (`pk_test_…`), pass `testClock: true` to `checkout()` to put the buyer on a Stripe test clock you can fast-forward to try renewals; the response returns its id as `testClockId`.
+
 ### Client options
 
 ```ts

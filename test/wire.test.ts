@@ -118,4 +118,14 @@ describe('wire mappers', () => {
       checkoutUrl: 'https://checkout.stripe.com/session/1',
     });
   });
+
+  it('fromCheckoutWire maps test_clock_id and drops a null one', () => {
+    expect(fromCheckoutWire({checkout_url: 'https://c.test/1', test_clock_id: 'clock_123'})).toEqual({
+      checkoutUrl: 'https://c.test/1',
+      testClockId: 'clock_123',
+    });
+    expect(fromCheckoutWire({checkout_url: 'https://c.test/1', test_clock_id: null})).toStrictEqual({
+      checkoutUrl: 'https://c.test/1',
+    });
+  });
 });

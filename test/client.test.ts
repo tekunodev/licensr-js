@@ -157,6 +157,25 @@ describe('LicensrClient', () => {
     const {url, body} = lastRequest(fetchImpl);
     expect(url).toBe('https://api.example.test/v1/billing/checkout');
     expect(body).toEqual({plan_id: 'plan-1', customer_email: 'buyer@example.com', success_url: null, cancel_url: null});
+    expect(result.testClockId).toBeUndefined();
+  });
+
+  it('checkout() sends test_clock only when asked and maps test_clock_id', async () => {
+    fetchImpl.mockResolvedValue(
+      jsonResponse(200, {checkout_url: 'https://checkout.stripe.com/session/1', test_clock_id: 'clock_123'})
+    );
+    const client = makeClient(fetchImpl);
+
+    const result = await client.checkout({planId: 'plan-1', customerEmail: 'buyer@example.com', testClock: true});
+
+    expect(result.testClockId).toBe('clock_123');
+    expect(lastRequest(fetchImpl).body).toEqual({
+      plan_id: 'plan-1',
+      customer_email: 'buyer@example.com',
+      success_url: null,
+      cancel_url: null,
+      test_clock: true,
+    });
   });
 
   it('emits a typed lifecycle event on success', async () => {

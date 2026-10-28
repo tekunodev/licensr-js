@@ -173,6 +173,8 @@ export class LicensrClient {
           customer_email: req.customerEmail,
           success_url: req.successUrl ?? null,
           cancel_url: req.cancelUrl ?? null,
+          // Sent only when asked for, so servers without test clocks see the same body.
+          ...(req.testClock ? {test_clock: true} : {}),
         },
         onRetry: this.onRetry('checkout'),
       });

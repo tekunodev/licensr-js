@@ -128,8 +128,12 @@ export function fromActivationsWire(wire: ActivationsResponseWire): ActivationsR
 
 export interface CheckoutResponseWire {
   checkout_url: string;
+  /** Absent on servers older than the test clock option. */
+  test_clock_id?: string | null;
 }
 
 export function fromCheckoutWire(wire: CheckoutResponseWire): CheckoutResponse {
-  return {checkoutUrl: wire.checkout_url};
+  return wire.test_clock_id
+    ? {checkoutUrl: wire.checkout_url, testClockId: wire.test_clock_id}
+    : {checkoutUrl: wire.checkout_url};
 }

@@ -130,10 +130,14 @@ export interface CheckoutRequest {
   customerEmail: string;
   successUrl?: string | null;
   cancelUrl?: string | null;
+  /** Test keys (`pk_test_...`) only. Puts the buyer on a new Stripe test clock you can fast-forward to try renewals. */
+  testClock?: boolean;
 }
 
 export interface CheckoutResponse {
   checkoutUrl: string;
+  /** The Stripe test clock the buyer is on, when you asked for one with `testClock`. */
+  testClockId?: string;
 }
 
 /** Every documented `detail.error` code from the license API — see contract/conformance.yaml. */
