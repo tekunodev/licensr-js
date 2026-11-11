@@ -67,6 +67,28 @@ describe('verifyOfflineToken', () => {
     expect(claims.livemode).toBe(false);
   });
 
+  it('refuses a token for another product when pluginSlug is set', async () => {
+    // Every product of a store signs with the same key.
+    const now = Math.floor(Date.now() / 1000);
+    const {token, jwks} = await signToken({
+      sub: 'license-123',
+      plugin_slug: 'other-plugin',
+      iat: now,
+      nbf: now,
+      exp: now + 3600,
+    });
+
+    await expect(
+      verifyOfflineToken(token, JWKS_URL, {fetchImpl: fetchImplFor(jwks), pluginSlug: 'my-plugin'})
+    ).rejects.toThrow(/for product "other-plugin", not "my-plugin"/);
+    clearJwksCache();
+    const claims = await verifyOfflineToken(token, JWKS_URL, {
+      fetchImpl: fetchImplFor(jwks),
+      pluginSlug: 'other-plugin',
+    });
+    expect(claims.plugin_slug).toBe('other-plugin');
+  });
+
   it('accepts a live token and one from before the livemode claim', async () => {
     const now = Math.floor(Date.now() / 1000);
     for (const extra of [{livemode: true}, {}]) {

@@ -13,6 +13,12 @@ export interface VerifyOfflineTokenOptions {
    * only in a build that uses a `pk_test_...` key.
    */
   allowTestTokens?: boolean;
+  /**
+   * Refuse a token issued for another product. Every product of a store signs
+   * with the store's one key, so without this a token for one of your products
+   * also verifies for another — set it to your plugin slug.
+   */
+  pluginSlug?: string;
 }
 
 // `createRemoteJWKSet` already caches keys in-memory with a cooldown, so
@@ -41,8 +47,9 @@ export function clearJwksCache(): void {
  * Verify an offline license token (from {@link import('./client.js').LicensrClient.token})
  * fully offline: no network call beyond fetching (and caching) the plugin's
  * public JWKS. Throws {@link LicensrTokenVerificationError} on a bad
- * signature, wrong algorithm, an expired/not-yet-valid token, or a token
- * minted with a test key (unless `allowTestTokens`).
+ * signature, wrong algorithm, an expired/not-yet-valid token, a token for
+ * another product (with `pluginSlug`), or a token minted with a test key
+ * (unless `allowTestTokens`).
  *
  * Tokens carry no revocation signal — this only proves the token was
  * genuinely issued by Licensr and hasn't expired, not that the license is
@@ -61,6 +68,9 @@ export async function verifyOfflineToken(
       clockTolerance: options.clockToleranceSeconds ?? 60,
     });
     const claims = payload as unknown as OfflineTokenClaims;
+    if (options.pluginSlug && claims.plugin_slug !== options.pluginSlug) {
+      throw new Error(`token is for product "${claims.plugin_slug}", not "${options.pluginSlug}"`);
+    }
     // Tokens from before the claim existed carry none and are accepted.
     if (claims.livemode === false && !options.allowTestTokens) {
       throw new Error('token was minted with a test key (set allowTestTokens in a test build)');
