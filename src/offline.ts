@@ -7,6 +7,12 @@ export interface VerifyOfflineTokenOptions {
   fetchImpl?: typeof fetch;
   /** Reject if the token's `iat`/`nbf` are further in the future than this many seconds (clock skew tolerance). Default 60. */
   clockToleranceSeconds?: number;
+  /**
+   * Accept tokens minted with a test key (claim `livemode: false`). Test and live
+   * tokens share the signing key, so a shipped build must refuse them; set this
+   * only in a build that uses a `pk_test_...` key.
+   */
+  allowTestTokens?: boolean;
 }
 
 // `createRemoteJWKSet` already caches keys in-memory with a cooldown, so
@@ -35,7 +41,8 @@ export function clearJwksCache(): void {
  * Verify an offline license token (from {@link import('./client.js').LicensrClient.token})
  * fully offline: no network call beyond fetching (and caching) the plugin's
  * public JWKS. Throws {@link LicensrTokenVerificationError} on a bad
- * signature, wrong algorithm, or an expired/not-yet-valid token.
+ * signature, wrong algorithm, an expired/not-yet-valid token, or a token
+ * minted with a test key (unless `allowTestTokens`).
  *
  * Tokens carry no revocation signal — this only proves the token was
  * genuinely issued by Licensr and hasn't expired, not that the license is
@@ -53,7 +60,12 @@ export async function verifyOfflineToken(
       algorithms: ['EdDSA'],
       clockTolerance: options.clockToleranceSeconds ?? 60,
     });
-    return payload as unknown as OfflineTokenClaims;
+    const claims = payload as unknown as OfflineTokenClaims;
+    // Tokens from before the claim existed carry none and are accepted.
+    if (claims.livemode === false && !options.allowTestTokens) {
+      throw new Error('token was minted with a test key (set allowTestTokens in a test build)');
+    }
+    return claims;
   } catch (cause) {
     const reason = cause instanceof Error ? cause.message : String(cause);
     throw new LicensrTokenVerificationError(`Offline token verification failed: ${reason}`);

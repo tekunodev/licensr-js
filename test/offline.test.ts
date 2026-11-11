@@ -53,6 +53,31 @@ describe('verifyOfflineToken', () => {
     expect(claims.entitlement).toBe('full');
   });
 
+  it("refuses a test key's token unless allowTestTokens is set", async () => {
+    // Test and live tokens share the signing key: only `livemode` stops a free
+    // test license from unlocking a shipped build.
+    const now = Math.floor(Date.now() / 1000);
+    const {token, jwks} = await signToken({sub: 'license-123', livemode: false, iat: now, nbf: now, exp: now + 3600});
+
+    await expect(verifyOfflineToken(token, JWKS_URL, {fetchImpl: fetchImplFor(jwks)})).rejects.toThrow(
+      /minted with a test key/
+    );
+    clearJwksCache();
+    const claims = await verifyOfflineToken(token, JWKS_URL, {fetchImpl: fetchImplFor(jwks), allowTestTokens: true});
+    expect(claims.livemode).toBe(false);
+  });
+
+  it('accepts a live token and one from before the livemode claim', async () => {
+    const now = Math.floor(Date.now() / 1000);
+    for (const extra of [{livemode: true}, {}]) {
+      clearJwksCache();
+      const {token, jwks} = await signToken({sub: 'license-123', ...extra, iat: now, nbf: now, exp: now + 3600});
+      await expect(verifyOfflineToken(token, JWKS_URL, {fetchImpl: fetchImplFor(jwks)})).resolves.toMatchObject({
+        sub: 'license-123',
+      });
+    }
+  });
+
   it('rejects a token signed by a key not in the JWKS', async () => {
     const now = Math.floor(Date.now() / 1000);
     const {token} = await signToken({sub: 'license-123', iat: now, nbf: now, exp: now + 3600});

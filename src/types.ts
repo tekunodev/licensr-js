@@ -113,6 +113,8 @@ export interface OfflineTokenClaims {
   nbf: number;
   exp: number;
   plugin_slug: string;
+  /** `false` for a token minted with a test key; absent on tokens from before the claim. */
+  livemode?: boolean;
   plan_id: string | null;
   status: LicenseStatus;
   valid: boolean;
