@@ -89,6 +89,8 @@ Offline tokens carry no revocation signal — they prove the token was genuinely
 
 A token minted with a test key (`pk_test_…`) is refused, because test and live tokens are signed with the same key. In a test build, pass `{allowTestTokens: true}` as the third argument.
 
+Pass `{pluginSlug: 'my-plugin'}` too: every product of your store signs with the same key, so without it a token for one of your products also unlocks another.
+
 To boot fully offline (no network at all, e.g. on first launch before any successful `/token` call), persist the last-known-good token yourself using the `OfflineTokenStore` interface (a `InMemoryOfflineTokenStore` is included, but doesn't survive a restart — back it with `localStorage`, a config file, or your platform's keychain):
 
 ```ts
